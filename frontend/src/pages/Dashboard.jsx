@@ -7,6 +7,7 @@ import TasksPanel from '../components/TasksPanel.jsx'
 import DocumentsPanel from '../components/DocumentsPanel.jsx'
 import PaymentsPanel from '../components/PaymentsPanel.jsx'
 import useSaaSData from '../hooks/useSaaSData.js'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const sectionCopy = {
   clients: {
@@ -33,6 +34,7 @@ const sectionCopy = {
 
 function Dashboard () {
   const [section, setSection] = useState('clients')
+  const { user, signOut } = useAuth()
   const {
     clients,
     workers,
@@ -61,7 +63,14 @@ function Dashboard () {
         <DashboardHeader
           title={headerCopy.title}
           subtitle={headerCopy.subtitle}
-          actions={loading ? <span className="badge">Refreshing…</span> : null}
+          actions={(
+            <>
+              {loading && <span className="badge">Refreshing…</span>}
+              <button type="button" className="primary-button" onClick={signOut}>
+                Sign out {user?.email ? `(${user.email})` : ''}
+              </button>
+            </>
+          )}
         />
         {error?.message && (
           <div className="section-card" style={{ background: 'rgba(255, 99, 71, 0.12)' }}>

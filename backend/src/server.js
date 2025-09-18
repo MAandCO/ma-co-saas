@@ -1,19 +1,15 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import path from 'path'
-import { fileURLToPath } from 'url'
 import routes from './routes/index.js'
 import { stripeWebhook } from './controllers/webhooksController.js'
 import { uploadsDir } from './middleware/upload.js'
+import { requireAuth } from './middleware/auth.js'
 
 dotenv.config()
 
 const app = express()
 const port = process.env.PORT || 4000
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 const allowedOrigins = process.env.CLIENT_APP_URL ? process.env.CLIENT_APP_URL.split(',') : ['http://localhost:5173']
 
@@ -35,7 +31,7 @@ app.get('/health', (req, res) => {
 
 app.post('/api/webhooks/stripe', stripeWebhook)
 
-app.use('/api', routes)
+app.use('/api', requireAuth, routes)
 
 app.use((err, req, res, next) => {
   console.error('Unhandled error', err)

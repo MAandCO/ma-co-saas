@@ -1,7 +1,12 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
 import './LandingPage.css'
 
 function LandingPage () {
+  const { user } = useAuth()
+  const primaryCta = user ? '/dashboard' : '/auth'
+  const primaryLabel = user ? 'Enter dashboard' : 'Launch app'
+
   return (
     <div className="landing-wrapper">
       <header className="landing-hero">
@@ -11,7 +16,7 @@ function LandingPage () {
             <a href="#features">Features</a>
             <a href="#automation">Automation</a>
             <a href="#compliance">Compliance</a>
-            <Link to="/dashboard" className="nav-cta">Launch App</Link>
+            <Link to={primaryCta} className="nav-cta">{user ? 'Dashboard' : 'Login'}</Link>
           </div>
         </nav>
         <div className="hero-content">
@@ -22,7 +27,7 @@ function LandingPage () {
               A modern practice cockpit built for proactive accountants. Ma & Co CRM orchestrates clients, staff, compliance tasks, documents, and billing in a single navy & gold workspace.
             </p>
             <div className="hero-actions">
-              <Link to="/dashboard" className="hero-primary">Enter dashboard</Link>
+              <Link to={primaryCta} className="hero-primary">{primaryLabel}</Link>
               <a href="#features" className="hero-secondary">Discover more</a>
             </div>
           </div>
@@ -100,7 +105,7 @@ function LandingPage () {
         </div>
         <div className="compliance-cta">
           <span>Ready to orchestrate Ma & Co?</span>
-          <Link to="/dashboard" className="hero-primary">Open the cockpit</Link>
+          <Link to={primaryCta} className="hero-primary">{primaryLabel}</Link>
         </div>
       </section>
 

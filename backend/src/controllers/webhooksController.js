@@ -1,5 +1,5 @@
 import { getStripeClient } from '../services/stripeService.js'
-import { upsertItem } from '../utils/dataStore.js'
+import { supabaseAdmin } from '../services/supabaseClient.js'
 
 export async function stripeWebhook (req, res) {
   const sig = req.headers['stripe-signature']
@@ -16,17 +16,19 @@ export async function stripeWebhook (req, res) {
     const event = stripe.webhooks.constructEvent(rawBody, sig, secret)
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object
-      const record = {
-        clientId: session.metadata?.clientId || null,
-        stripeSessionId: session.id,
-        amount: session.amount_total ? session.amount_total / 100 : null,
-        currency: session.currency,
-        description: session.payment_intent || session.mode,
-        status: session.status,
-        url: session.url,
-        completedAt: new Date().toISOString()
+      const amount = session.amount_total ? session.amount_total / 100 : null
+      const { error } = await supabaseAdmin
+        .from('payments')
+        .update({
+          status: session.status,
+          amount,
+          currency: session.currency,
+          completed_at: new Date().toISOString()
+        })
+        .eq('stripe_session_id', session.id)
+      if (error) {
+        console.error('Failed to update payment record', error)
       }
-      await upsertItem('payments', record, payment => payment.stripeSessionId === session.id)
     }
     res.json({ received: true })
   } catch (error) {

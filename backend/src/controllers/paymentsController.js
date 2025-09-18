@@ -1,8 +1,21 @@
 import { getStripeClient } from '../services/stripeService.js'
-import { listItems, upsertItem } from '../utils/dataStore.js'
-import { v4 as uuid } from 'uuid'
+import { supabaseAdmin } from '../services/supabaseClient.js'
+
+const mapPayment = record => ({
+  id: record.id,
+  clientId: record.client_id,
+  stripeSessionId: record.stripe_session_id,
+  amount: record.amount,
+  currency: record.currency,
+  description: record.description,
+  status: record.status,
+  url: record.url,
+  createdAt: record.created_at,
+  completedAt: record.completed_at
+})
 
 export async function createCheckoutSession (req, res) {
+  const { ownerId } = req
   const { clientId, amount, currency, description, successUrl, cancelUrl } = req.body
   if (!clientId || !amount) {
     return res.status(400).json({ error: 'clientId and amount are required.' })
@@ -27,28 +40,43 @@ export async function createCheckoutSession (req, res) {
       ],
       success_url: successUrl || `${process.env.CLIENT_APP_URL}/payments/success`,
       cancel_url: cancelUrl || `${process.env.CLIENT_APP_URL}/payments/cancel`,
-      metadata: { clientId }
+      metadata: { clientId, ownerId }
     })
 
-    const record = {
-      id: uuid(),
-      clientId,
-      stripeSessionId: session.id,
+    const payload = {
+      owner_id: ownerId,
+      client_id: clientId,
+      stripe_session_id: session.id,
       amount,
       currency: currency || 'gbp',
-      description: description || '',
+      description: description || null,
       status: session.status,
       url: session.url,
-      createdAt: new Date().toISOString()
+      created_at: new Date().toISOString()
     }
-    await upsertItem('payments', record, () => false)
-    res.json({ checkoutUrl: session.url, sessionId: session.id, record })
+    const { data, error } = await supabaseAdmin
+      .from('payments')
+      .insert(payload)
+      .select('*')
+      .single()
+    if (error) throw error
+    res.json({ checkoutUrl: session.url, sessionId: session.id, record: mapPayment(data) })
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
 }
 
 export async function listPaymentsController (req, res) {
-  const payments = await listItems('payments')
-  res.json(payments)
+  try {
+    const { ownerId } = req
+    const { data, error } = await supabaseAdmin
+      .from('payments')
+      .select('*')
+      .eq('owner_id', ownerId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    res.json(data.map(mapPayment))
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
 }

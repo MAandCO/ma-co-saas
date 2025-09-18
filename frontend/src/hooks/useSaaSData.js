@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 
-axios.defaults.baseURL = ''
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
+axios.defaults.baseURL = apiBaseUrl
 
 const defaultError = () => ({ message: null, context: null })
+
+const extractMessage = error => error.response?.data?.error || error.message || 'Unexpected error'
 
 export default function useSaaSData () {
   const [clients, setClients] = useState([])
@@ -52,7 +55,7 @@ export default function useSaaSData () {
         fetchPayments()
       ])
     } catch (err) {
-      setError({ message: err.message, context: 'Unable to load data' })
+      setError({ message: extractMessage(err), context: 'Unable to load data' })
     } finally {
       setLoading(false)
     }
@@ -67,7 +70,7 @@ export default function useSaaSData () {
       const res = await axios.post('/api/clients', payload)
       setClients(prev => [...prev, res.data])
     } catch (err) {
-      setError({ message: err.message, context: 'Create client' })
+      setError({ message: extractMessage(err), context: 'Create client' })
       throw err
     }
   }
@@ -77,7 +80,7 @@ export default function useSaaSData () {
       const res = await axios.put(`/api/clients/${id}`, payload)
       setClients(prev => prev.map(client => (client.id === id ? res.data : client)))
     } catch (err) {
-      setError({ message: err.message, context: 'Update client' })
+      setError({ message: extractMessage(err), context: 'Update client' })
       throw err
     }
   }
@@ -87,7 +90,7 @@ export default function useSaaSData () {
       const res = await axios.post('/api/workers', payload)
       setWorkers(prev => [...prev, res.data])
     } catch (err) {
-      setError({ message: err.message, context: 'Create worker' })
+      setError({ message: extractMessage(err), context: 'Create worker' })
       throw err
     }
   }
@@ -97,7 +100,7 @@ export default function useSaaSData () {
       const res = await axios.post('/api/tasks', payload)
       setTasks(prev => [...prev, res.data])
     } catch (err) {
-      setError({ message: err.message, context: 'Create task' })
+      setError({ message: extractMessage(err), context: 'Create task' })
       throw err
     }
   }
@@ -107,7 +110,7 @@ export default function useSaaSData () {
       const res = await axios.put(`/api/tasks/${id}`, payload)
       setTasks(prev => prev.map(task => (task.id === id ? res.data : task)))
     } catch (err) {
-      setError({ message: err.message, context: 'Update task' })
+      setError({ message: extractMessage(err), context: 'Update task' })
       throw err
     }
   }
@@ -118,7 +121,7 @@ export default function useSaaSData () {
       setTasks(prev => [...prev, ...res.data])
       return res.data
     } catch (err) {
-      setError({ message: err.message, context: 'Generate tasks' })
+      setError({ message: extractMessage(err), context: 'Generate tasks' })
       throw err
     }
   }
@@ -136,7 +139,7 @@ export default function useSaaSData () {
       })
       setDocuments(prev => [...prev, res.data])
     } catch (err) {
-      setError({ message: err.message, context: 'Upload document' })
+      setError({ message: extractMessage(err), context: 'Upload document' })
       throw err
     }
   }
@@ -149,7 +152,7 @@ export default function useSaaSData () {
       }
       return res.data
     } catch (err) {
-      setError({ message: err.message, context: 'Create checkout session' })
+      setError({ message: extractMessage(err), context: 'Create checkout session' })
       throw err
     }
   }

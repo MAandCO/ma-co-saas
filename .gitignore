@@ -6,6 +6,7 @@ frontend/node_modules/
 # Environment & secrets
 .env
 backend/.env
+frontend/.env
 
 # Build output
 backend/uploads/

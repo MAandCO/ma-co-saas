@@ -1,46 +1,110 @@
-import { v4 as uuid } from 'uuid'
-import { getStore, upsertItem, listItems, removeItem } from '../utils/dataStore.js'
+import { supabaseAdmin } from '../services/supabaseClient.js'
+
+const mapClient = record => ({
+  id: record.id,
+  name: record.name,
+  utr: record.utr,
+  vatNumber: record.vat_number,
+  payeReference: record.paye_reference,
+  companiesHouseNumber: record.companies_house_number,
+  email: record.email,
+  phone: record.phone,
+  createdAt: record.created_at
+})
 
 export async function getClients (req, res) {
-  const clients = await listItems('clients')
-  res.json(clients)
+  try {
+    const { ownerId } = req
+    const { data, error } = await supabaseAdmin
+      .from('clients')
+      .select('*')
+      .eq('owner_id', ownerId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    res.json(data.map(mapClient))
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
 }
 
 export async function createClient (req, res) {
+  const { ownerId } = req
   const { name, utr, vatNumber, payeReference, companiesHouseNumber, email, phone } = req.body
   if (!name) {
     return res.status(400).json({ error: 'Client name is required.' })
   }
-  const client = {
-    id: uuid(),
-    name,
-    utr: utr || '',
-    vatNumber: vatNumber || '',
-    payeReference: payeReference || '',
-    companiesHouseNumber: companiesHouseNumber || '',
-    email: email || '',
-    phone: phone || '',
-    createdAt: new Date().toISOString()
+  try {
+    const payload = {
+      owner_id: ownerId,
+      name,
+      utr: utr || null,
+      vat_number: vatNumber || null,
+      paye_reference: payeReference || null,
+      companies_house_number: companiesHouseNumber || null,
+      email: email || null,
+      phone: phone || null
+    }
+    const { data, error } = await supabaseAdmin
+      .from('clients')
+      .insert(payload)
+      .select('*')
+      .single()
+    if (error) throw error
+    res.status(201).json(mapClient(data))
+  } catch (error) {
+    res.status(500).json({ error: error.message })
   }
-  await upsertItem('clients', client, () => false)
-  res.status(201).json(client)
 }
 
 export async function updateClient (req, res) {
+  const { ownerId } = req
   const { id } = req.params
-  const updates = req.body
-  const store = await getStore()
-  const existing = (store.clients || []).find(client => client.id === id)
-  if (!existing) {
-    return res.status(404).json({ error: 'Client not found.' })
+  const { name, utr, vatNumber, payeReference, companiesHouseNumber, email, phone } = req.body
+  try {
+    const { data: existing, error: fetchError } = await supabaseAdmin
+      .from('clients')
+      .select('*')
+      .eq('id', id)
+      .eq('owner_id', ownerId)
+      .single()
+    if (fetchError && fetchError.code !== 'PGRST116') throw fetchError
+    if (!existing) {
+      return res.status(404).json({ error: 'Client not found.' })
+    }
+    const { data, error } = await supabaseAdmin
+      .from('clients')
+      .update({
+        name: name ?? existing.name,
+        utr: utr ?? existing.utr,
+        vat_number: vatNumber ?? existing.vat_number,
+        paye_reference: payeReference ?? existing.paye_reference,
+        companies_house_number: companiesHouseNumber ?? existing.companies_house_number,
+        email: email ?? existing.email,
+        phone: phone ?? existing.phone
+      })
+      .eq('id', id)
+      .eq('owner_id', ownerId)
+      .select('*')
+      .single()
+    if (error) throw error
+    res.json(mapClient(data))
+  } catch (error) {
+    res.status(500).json({ error: error.message })
   }
-  const updated = { ...existing, ...updates, id }
-  await upsertItem('clients', updated, client => client.id === id)
-  res.json(updated)
 }
 
 export async function deleteClient (req, res) {
+  const { ownerId } = req
   const { id } = req.params
-  const remaining = await removeItem('clients', client => client.id === id)
-  res.json({ success: true, remaining })
+  try {
+    const { error } = await supabaseAdmin
+      .from('clients')
+      .delete()
+      .eq('id', id)
+      .eq('owner_id', ownerId)
+    if (error) throw error
+    res.json({ success: true })
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
 }
