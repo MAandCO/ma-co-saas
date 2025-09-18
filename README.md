@@ -115,7 +115,9 @@ create table payments (
 );
 ```
 
-Enable Row Level Security when you are ready and add policies that restrict access to `owner_id = auth.uid()`. While prototyping, you can leave RLS disabled because the Express API already enforces ownership with the service role key.
+- **Seed data:** update `supabase/seed.sql` with your workspace owner UUID (replace `{{OWNER_ID}}`) and apply it via `supabase db remote commit supabase/seed.sql` or through the SQL editor in the dashboard.
+- **Row Level Security:** run `supabase/rls.sql` once you are ready to enforce Supabase-side access control. The script enables RLS on every table and restricts CRUD to rows where `owner_id = auth.uid()`.
+- While prototyping you can leave RLS disabled; the Express API still guards access by verifying the Supabase JWT with the service role key.
 
 ### Stripe CLI (local testing)
 
