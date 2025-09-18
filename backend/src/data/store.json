@@ -1,0 +1,63 @@
+{
+  "clients": [
+    {
+      "id": "151e2cdf-7fa1-456b-8599-8808e416ad90",
+      "name": "Majed Ali",
+      "utr": "8915373473",
+      "vatNumber": "",
+      "payeReference": "",
+      "companiesHouseNumber": "",
+      "email": "info@maandcoaccountants.com",
+      "phone": "02801588499",
+      "createdAt": "2025-09-18T22:35:03.212Z"
+    },
+    {
+      "id": "03d230aa-b8e9-4c60-ab23-26a7e174514d",
+      "name": "Majed Ali",
+      "utr": "1285644004",
+      "vatNumber": "tdidtidtidti",
+      "payeReference": "drtyidtidtidt",
+      "companiesHouseNumber": "dtyidtyidti",
+      "email": "info@maandcoaccountants.com",
+      "phone": "02801588499",
+      "createdAt": "2025-09-18T22:36:39.749Z"
+    }
+  ],
+  "workers": [
+    {
+      "id": "68a378f3-dff5-40d1-94f1-98b897761a6e",
+      "name": "Majed Ali",
+      "email": "info@maandcoaccountants.com",
+      "specialties": [
+        "cis"
+      ],
+      "createdAt": "2025-09-18T22:37:05.693Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "5a52bbbe-7d42-43c9-8867-a75d680ab606",
+      "title": "vat",
+      "description": "do vat return ",
+      "dueDate": "2025-09-07",
+      "clientId": "151e2cdf-7fa1-456b-8599-8808e416ad90",
+      "assigneeId": "68a378f3-dff5-40d1-94f1-98b897761a6e",
+      "category": "Compliance",
+      "status": "Pending",
+      "createdAt": "2025-09-18T22:37:56.058Z"
+    }
+  ],
+  "documents": [
+    {
+      "id": "c5292859-4f6d-4082-a995-1cf124cdb3bf",
+      "clientId": "151e2cdf-7fa1-456b-8599-8808e416ad90",
+      "filename": "1758235102555-Gemini_Generated_Image_u6dbdpu6dbdpu6db.png",
+      "originalName": "Gemini_Generated_Image_u6dbdpu6dbdpu6db.png",
+      "path": "/Users/hawre/ma-co-saas/backend/uploads/1758235102555-Gemini_Generated_Image_u6dbdpu6dbdpu6db.png",
+      "description": "Uploaded from iPhone",
+      "category": "Engagement",
+      "uploadedAt": "2025-09-18T22:38:22.561Z"
+    }
+  ],
+  "payments": []
+}
