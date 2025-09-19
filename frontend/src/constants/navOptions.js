@@ -3,5 +3,6 @@ export const navOptions = [
   { key: 'workers', label: 'Staff', icon: '👔 ' },
   { key: 'tasks', label: 'Tasks', icon: '📋 ' },
   { key: 'documents', label: 'Documents', icon: '📁 ' },
-  { key: 'payments', label: 'Payments', icon: '💷 ' }
+  { key: 'payments', label: 'Payments', icon: '💷 ' },
+  { key: 'sql', label: 'SQL Editor', icon: '🧠 ' }
 ]

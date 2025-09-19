@@ -8,7 +8,7 @@ export async function generateComplianceTasks (clientProfile) {
     throw new Error('Missing OPENROUTER_API_KEY environment variable.')
   }
 
-  const systemPrompt = `You are an assistant for an accounting firm that specialises in UK compliance. Given client details, generate structured tasks with due dates, descriptions, and recommended assignees. Always return JSON with fields: title, description, dueDate (YYYY-MM-DD), category, suggestedAssigneeRole.`
+  const systemPrompt = 'You are an assistant for an accounting firm that specialises in UK compliance. Given client details, generate structured tasks with due dates, descriptions, and recommended assignees. Always return JSON with fields: title, description, dueDate (YYYY-MM-DD), category, suggestedAssigneeRole.'
 
   const userPrompt = `Client profile: ${JSON.stringify(clientProfile)}. Client type: ${clientProfile.type || 'general'}. Include statutory deadlines such as CIS returns (due 19th monthly), VAT returns (quarterly), payroll submissions, CT600, Self Assessment, and onboarding tasks if relevant.`
 
@@ -16,7 +16,7 @@ export async function generateComplianceTasks (clientProfile) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
       'HTTP-Referer': 'https://ma-co.local',
       'X-Title': 'Ma & Co Compliance Planner'
     },

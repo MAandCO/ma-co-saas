@@ -8,6 +8,7 @@ A navy & gold practice cockpit for Ma & Co Accountants. The platform combines a 
 ma-co-saas/
 ├── backend/          # Express API (Auth guard, Supabase persistence, AI, Stripe)
 ├── frontend/         # Vite + React client (homepage + protected dashboard)
+├── supabase/         # schema.sql, rls.sql, seed.sql helpers for your project
 └── README.md
 ```
 
@@ -49,75 +50,11 @@ Key endpoints:
 
 ### Supabase schema
 
-Create the tables below (adjust names if you prefer camelCase columns – the controllers expect the snake_case layout shown here):
+All table/trigger definitions now live in `supabase/schema.sql`. Run it once against your Supabase project (SQL Editor → paste contents → **Run**, or `supabase db push --file supabase/schema.sql`). Follow it with `supabase/rls.sql` to enable the per-owner policies your API expects.
 
-```sql
-create table clients (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null,
-  name text not null,
-  utr text,
-  vat_number text,
-  paye_reference text,
-  companies_house_number text,
-  email text,
-  phone text,
-  created_at timestamptz default now()
-);
-
-create table workers (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null,
-  name text not null,
-  email text,
-  specialties text[] default '{}',
-  created_at timestamptz default now()
-);
-
-create table tasks (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null,
-  client_id uuid references clients(id) on delete set null,
-  assignee_id uuid references workers(id) on delete set null,
-  title text not null,
-  description text,
-  due_date date,
-  category text default 'Compliance',
-  status text default 'Pending',
-  suggested_assignee_role text,
-  created_at timestamptz default now()
-);
-
-create table documents (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null,
-  client_id uuid references clients(id) on delete set null,
-  filename text not null,
-  original_name text not null,
-  storage_path text not null,
-  description text,
-  category text default 'General',
-  uploaded_at timestamptz default now()
-);
-
-create table payments (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null,
-  client_id uuid references clients(id) on delete set null,
-  stripe_session_id text unique not null,
-  amount numeric,
-  currency text,
-  description text,
-  status text,
-  url text,
-  created_at timestamptz default now(),
-  completed_at timestamptz
-);
-```
-
-- **Seed data:** update `supabase/seed.sql` with your workspace owner UUID (replace `{{OWNER_ID}}`) and apply it via `supabase db remote commit supabase/seed.sql` or through the SQL editor in the dashboard.
-- **Row Level Security:** run `supabase/rls.sql` once you are ready to enforce Supabase-side access control. The script enables RLS on every table and restricts CRUD to rows where `owner_id = auth.uid()`.
-- While prototyping you can leave RLS disabled; the Express API still guards access by verifying the Supabase JWT with the service role key.
+- **Seed data:** update `supabase/seed.sql` with your workspace owner UUID (replace `{{OWNER_ID}}`) and apply it via the Studio SQL editor or the Supabase CLI.
+- **Re-running locally:** if you drop tables during development, just re-run `schema.sql` followed by `rls.sql`.
+- **API fallback:** if `SUPABASE_URL`/`SERVICE_ROLE_KEY` are missing, the backend and frontend show helpful warnings instead of crashing, making local iteration easier.
 
 ### Stripe CLI (local testing)
 
@@ -162,6 +99,7 @@ The dev server proxies `/api/*` to `http://localhost:4000`. Supabase Auth drives
 - **Tasks** – AI-generated compliance runway, status & assignee controls.
 - **Documents** – upload/download engagement letters, payroll files, VAT submissions.
 - **Payments** – create Stripe checkout links and monitor completions.
+- **SQL Editor** – run read-only `SELECT * FROM <table> [LIMIT n]` queries against your workspace data without leaving the app.
 
 All sections now persist to Supabase tables through the authenticated API, so each firm only sees its own records.
 

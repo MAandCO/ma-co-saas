@@ -8,6 +8,7 @@ import DocumentsPanel from '../components/DocumentsPanel.jsx'
 import PaymentsPanel from '../components/PaymentsPanel.jsx'
 import useSaaSData from '../hooks/useSaaSData.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import SqlEditorPanel from '../components/SqlEditorPanel.jsx'
 
 const sectionCopy = {
   clients: {
@@ -29,6 +30,10 @@ const sectionCopy = {
   payments: {
     title: 'Billing centre',
     subtitle: 'Stripe handles collection; Ma & Co sees the cash flow pulse.'
+  },
+  sql: {
+    title: 'SQL workbench',
+    subtitle: 'Run read-only SELECT queries against your workspace tables.'
   }
 }
 
@@ -100,6 +105,9 @@ function Dashboard () {
         )}
         {section === 'payments' && (
           <PaymentsPanel payments={payments} clients={clients} onCreateSession={createCheckoutSession} />
+        )}
+        {section === 'sql' && (
+          <SqlEditorPanel />
         )}
       </main>
     </div>

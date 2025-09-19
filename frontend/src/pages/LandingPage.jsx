@@ -3,9 +3,10 @@ import { useAuth } from '../context/AuthContext.jsx'
 import './LandingPage.css'
 
 function LandingPage () {
-  const { user } = useAuth()
-  const primaryCta = user ? '/dashboard' : '/auth'
-  const primaryLabel = user ? 'Enter dashboard' : 'Launch app'
+  const { user, authEnabled } = useAuth()
+  const shouldBypassAuth = !authEnabled || Boolean(user)
+  const primaryCta = shouldBypassAuth ? '/dashboard' : '/auth'
+  const primaryLabel = shouldBypassAuth ? 'Enter dashboard' : 'Launch app'
 
   return (
     <div className="landing-wrapper">
@@ -16,7 +17,7 @@ function LandingPage () {
             <a href="#features">Features</a>
             <a href="#automation">Automation</a>
             <a href="#compliance">Compliance</a>
-            <Link to={primaryCta} className="nav-cta">{user ? 'Dashboard' : 'Login'}</Link>
+            <Link to={primaryCta} className="nav-cta">{shouldBypassAuth ? 'Dashboard' : 'Login'}</Link>
           </div>
         </nav>
         <div className="hero-content">
